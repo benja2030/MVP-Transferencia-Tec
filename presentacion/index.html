@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación</title>
+  <!-- Google Fonts defined in your deck.json -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #111; font-family: 'Nunito Sans', sans-serif; }
+    #slide-frame { width: 100vw; height: 100vh; border: none; }
+    #controls {
+      position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 9999;
+      background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 8px; backdrop-filter: blur(4px);
+    }
+    button {
+      background: #333; color: #fff; border: 1px solid #555; padding: 6px 12px;
+      border-radius: 4px; cursor: pointer; font-size: 14px;
+    }
+    button:disabled { opacity: 0.3; cursor: not-allowed; }
+    #counter { color: #fff; font-size: 14px; display: flex; align-items: center; padding: 0 6px; }
+  </style>
+</head>
+<body>
+  <iframe id="slide-frame" src=""></iframe>
+
+  <div id="controls">
+    <button id="prevBtn">◀ Ant</button>
+    <span id="counter">1 / 1</span>
+    <button id="nextBtn">Sig ▶</button>
+  </div>
+
+  <script>
+    let slides = [];
+    let currentIndex = 0;
+    const frame = document.getElementById('slide-frame');
+    const counter = document.getElementById('counter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    async function initDeck() {
+      try {
+        const res = await fetch('deck.json');
+        const data = await res.json();
+        slides = data.order || [];
+        if (slides.length > 0) {
+          showSlide(0);
+        }
+      } catch (err) {
+        console.error('Error loading deck.json:', err);
+      }
+    }
+
+    function showSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      currentIndex = index;
+      frame.src = `slides/${slides[currentIndex]}.html`;
+      counter.textContent = `${currentIndex + 1} / ${slides.length}`;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === slides.length - 1;
+    }
+
+    prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+    nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') showSlide(currentIndex + 1);
+      if (e.key === 'ArrowLeft') showSlide(currentIndex - 1);
+    });
+
+    initDeck();
+  </script>
+</body>
+</html>
